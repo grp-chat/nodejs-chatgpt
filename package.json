@@ -20,6 +20,7 @@
   "homepage": "https://github.com/grp-chat/videoctrl#readme",
   "dependencies": {
     "express": "^4.21.1",
+    "node-fetch": "^2.7.0",
     "socket.io": "^4.8.1"
   }
 }

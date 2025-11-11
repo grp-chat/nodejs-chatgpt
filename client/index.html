@@ -1,25 +1,20 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Text Sync (abc123)</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <main class="container">
-    <h1>Shared Text Demo</h1>
-    <div id="display" class="display">abc123</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.io Text Sync</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 id="displayText">abc123</h1>
 
-    <div class="controls">
-      <input id="textInput" type="text" placeholder="Type new text here" />
-      <button id="updateBtn">Update</button>
+      <input type="text" id="textInput" placeholder="Enter new text..." />
+      <button id="sendBtn">Update Text</button>
     </div>
 
-    <p class="note">Server stores and syncs this text across all connections.</p>
-  </main>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/index.js"></script>
-</body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/index.js"></script>
+  </body>
 </html>

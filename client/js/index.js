@@ -1,30 +1,44 @@
-(() => {
-  const socket = io();
+const socket = io();
 
-  const display = document.getElementById('display');
-  const input = document.getElementById('textInput');
-  const button = document.getElementById('updateBtn');
+const displayText = document.getElementById("displayText");
+const textInput = document.getElementById("textInput");
+const sendBtn = document.getElementById("sendBtn");
 
-  // Smooth text change animation
-  function setDisplayText(text) {
-    display.animate([{ opacity: 1 }, { opacity: 0.2 }], { duration: 150, fill: 'forwards' })
-      .onfinish = () => {
-        display.textContent = text;
-        display.animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: 150, fill: 'forwards' });
-      };
+let downloadTimeout = null; // debounce timer
+
+socket.on("updateText", (text) => {
+  displayText.textContent = text;
+
+  // Debounced auto-download
+  if (downloadTimeout) clearTimeout(downloadTimeout);
+  downloadTimeout = setTimeout(() => {
+    autoDownloadText(text);
+  }, 500); // 500ms delay
+});
+
+sendBtn.addEventListener("click", () => {
+  const newText = textInput.value.trim();
+  if (newText) {
+    socket.emit("newText", newText);
+    textInput.value = "";
   }
+});
 
-  socket.on('currentText', (text) => {
-    const finalText = text?.trim() || 'abc123';
-    setDisplayText(finalText);
-  });
+// Function to automatically download text as file
+function autoDownloadText(text) {
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
 
-  button.addEventListener('click', () => {
-    const newText = input.value;
-    socket.emit('updateText', newText);
-  });
+  const a = document.createElement("a");
+  a.href = url;
 
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') button.click();
-  });
-})();
+  // FIXED filename
+  a.download = "text.txt";
+
+  // Append, click, and remove
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
