@@ -1,44 +1,80 @@
 const socket = io();
 
-const displayText = document.getElementById("displayText");
-const textInput = document.getElementById("textInput");
-const sendBtn = document.getElementById("sendBtn");
+const displayDiv = document.getElementById('display');
+const inputText = document.getElementById('inputText');
+const btnChange = document.getElementById('btnChange');
+const statusDiv = document.getElementById('status');
 
-let downloadTimeout = null; // debounce timer
-
-socket.on("updateText", (text) => {
-  displayText.textContent = text;
-
-  // Debounced auto-download
-  if (downloadTimeout) clearTimeout(downloadTimeout);
-  downloadTimeout = setTimeout(() => {
-    autoDownloadText(text);
-  }, 500); // 500ms delay
-});
-
-sendBtn.addEventListener("click", () => {
-  const newText = textInput.value.trim();
-  if (newText) {
-    socket.emit("newText", newText);
-    textInput.value = "";
+// Helper: format arrays/objects for display
+function formatData(data) {
+  if (typeof data === 'string') return data;
+  try {
+    return JSON.stringify(data, null, 2);
+  } catch {
+    return String(data);
   }
+}
+
+// Helper: enable/disable button and input
+function setButtonDisabled(state) {
+  btnChange.disabled = state;
+  inputText.disabled = state;
+}
+
+// --- Socket Events ---
+
+socket.on('connect', () => {
+  console.log('Connected to server');
 });
 
-// Function to automatically download text as file
-function autoDownloadText(text) {
-  const blob = new Blob([text], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
+// Load or save completed
+socket.on('currentText', (data) => {
+  // Display content with fade + slide + flash
+  displayDiv.classList.add('fade', 'slide-in');
+  setTimeout(() => {
+    displayDiv.textContent = formatData(data);
+    displayDiv.classList.remove('fade', 'slide-in');
+    displayDiv.classList.add('flash-success');
 
-  const a = document.createElement("a");
-  a.href = url;
+    setTimeout(() => {
+      displayDiv.classList.remove('flash-success');
+      statusDiv.textContent = 'Completed';
+      statusDiv.style.color = 'green';
+      // Enable button only after initial load
+      setButtonDisabled(false);
+    }, 500);
+  }, 50);
+});
 
-  // FIXED filename
-  a.download = "text.txt";
+// Error message
+socket.on('errorMessage', (msg) => {
+  statusDiv.textContent = msg;
+  statusDiv.style.color = 'red';
+  setButtonDisabled(false);
+});
 
-  // Append, click, and remove
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+// Disable/enable button for all clients during save
+socket.on('savingInProgress', (state) => {
+  setButtonDisabled(state);
+  statusDiv.textContent = state ? 'Processing...' : 'Completed';
+  statusDiv.style.color = state ? 'black' : 'green';
+});
 
-  URL.revokeObjectURL(url);
-}
+// Button click → emit save request
+btnChange.addEventListener('click', () => {
+  const value = inputText.value.trim();
+  if (!value) {
+    statusDiv.textContent = 'Please enter some text';
+    statusDiv.style.color = 'red';
+    return;
+  }
+
+  let dataToSend = value;
+  try {
+    dataToSend = JSON.parse(value);
+  } catch {
+    // keep as string
+  }
+
+  socket.emit('changeText', dataToSend);
+});

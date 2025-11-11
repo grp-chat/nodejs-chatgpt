@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Socket.io Text Sync</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1 id="displayText">abc123</h1>
+<head>
+  <meta charset="UTF-8">
+  <title>Text Update Page</title>
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+  <div id="display">abcde</div>
 
-      <input type="text" id="textInput" placeholder="Enter new text..." />
-      <button id="sendBtn">Update Text</button>
-    </div>
+  <input type="text" id="inputText" placeholder="Enter new text">
+  <button id="btnChange">Change Text</button>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/index.js"></script>
-  </body>
+  <div id="status"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/index.js"></script>
+</body>
 </html>
